@@ -1,0 +1,31 @@
+# Build artifacts
+bank_server/server
+bank_server/init_sessions
+bank_server/migrate_*
+bank_server/*.o
+bank_server/*.d
+bank_server/src/*.o
+bank_server/src/*.d
+client
+*.exe
+
+# Generated certificates / secrets
+bank_server/certs/
+gateway/certs/
+gateway/bank-gateway
+
+# Web frontend
+web/node_modules/
+web/dist/
+web/.vite/
+web/.env.local
+
+# Editor / OS
+.DS_Store
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Local-only scratch
+last_id
