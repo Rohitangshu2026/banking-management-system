@@ -7,6 +7,9 @@ bank_server/*.d
 bank_server/src/*.o
 bank_server/src/*.d
 client
+client.d
+client.dSYM/
+bank_server/*.dSYM/
 *.exe
 
 # Generated certificates / secrets

@@ -24,7 +24,7 @@ void sigint_handler(int signo) {
     fflush(stdout);
 }
 
-int main() {
+int main(void) {
     int server_fd, client_fd;
     struct sockaddr_in server_addr, client_addr;
     socklen_t client_len = sizeof(client_addr);

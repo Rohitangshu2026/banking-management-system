@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include "../include/common.h"
 
-int main() {
+int main(void) {
     int fd_user, fd_session;
     User user;
     Session session;
