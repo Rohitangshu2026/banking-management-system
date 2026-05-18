@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Subtle parchment grain — a light noise overlay anchored to the body
+ * so the surface feels paper-like rather than flat-#F7F3EC plastic. */
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: #f7f3ec;
+    background-image: radial-gradient(
+        rgba(11, 18, 32, 0.025) 1px,
+        transparent 1px
+      ),
+      linear-gradient(180deg, #f7f3ec 0%, #f1ebdf 100%);
+    background-size: 3px 3px, 100% 100%;
+    min-height: 100vh;
+  }
+
+  h1, h2, h3 {
+    font-family: "Fraunces", ui-serif, Georgia, serif;
+    letter-spacing: -0.012em;
+  }
+
+  .num {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  .plate {
+    @apply rounded-xl bg-parchment-soft shadow-plate;
+  }
+
+  .hairline {
+    @apply border border-ink/10;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-md
+           bg-ink px-5 py-2.5 text-sm font-medium text-parchment
+           transition-colors hover:bg-ink-soft
+           focus-visible:outline focus-visible:outline-2
+           focus-visible:outline-offset-2 focus-visible:outline-gilded
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center rounded-md
+           border border-ink/15 bg-transparent px-4 py-2 text-sm
+           font-medium text-ink transition-colors
+           hover:bg-ink/5;
+  }
+
+  .input {
+    @apply w-full rounded-md border border-ink/15 bg-parchment-soft
+           px-3 py-2 text-sm text-ink placeholder:text-slate2
+           focus:border-gilded focus:outline-none focus:ring-2
+           focus:ring-gilded/30;
+  }
+
+  .label {
+    @apply mb-1.5 block text-xs font-medium uppercase tracking-[0.08em]
+           text-slate2;
+  }
+
+  .rule-gilded {
+    background: linear-gradient(
+      to right,
+      transparent,
+      rgba(176, 141, 87, 0.5) 50%,
+      transparent
+    );
+    height: 1px;
+  }
+}
