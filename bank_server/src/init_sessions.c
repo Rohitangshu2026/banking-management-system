@@ -17,7 +17,7 @@ int main(void) {
         return 1;
     }
 
-    fd_session = open(SESSION_FILE, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    fd_session = open(SESSION_FILE, O_WRONLY | O_CREAT | O_TRUNC, 0600);
     if (fd_session < 0) {
         perror("Failed to create sessions.txt");
         close(fd_user);

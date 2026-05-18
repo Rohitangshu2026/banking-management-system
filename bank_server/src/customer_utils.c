@@ -261,7 +261,7 @@ static void unlockAccount(int fd, off_t offset) {
 }
 
 static int logTransaction(int accountId, const char* type, double amount, int relatedId) {
-    int fd_txn = open(TRANSACTION_FILE, O_WRONLY | O_APPEND | O_CREAT, 0644);
+    int fd_txn = open(TRANSACTION_FILE, O_WRONLY | O_APPEND | O_CREAT, 0600);
     if (fd_txn < 0) {
         perror("logTransaction: open TRANSACTION_FILE");
         return 0;
@@ -717,7 +717,7 @@ int applyForLoan(int sock, int sourceAccountId, int userId) {
         return 0; 
     }
 
-    int fd_loan = open(LOAN_FILE, O_RDWR | O_CREAT, 0644);
+    int fd_loan = open(LOAN_FILE, O_RDWR | O_CREAT, 0600);
     if (fd_loan < 0) {
         perror("applyForLoan: open LOAN_FILE");
         write(sock, "Error accessing loan system. Please try again.\n", 47);
@@ -786,7 +786,7 @@ int addFeedback(int sock, int userId) {
         return 0; 
     }
 
-    int fd_fb = open(FEEDBACK_FILE, O_WRONLY | O_APPEND | O_CREAT, 0644);
+    int fd_fb = open(FEEDBACK_FILE, O_WRONLY | O_APPEND | O_CREAT, 0600);
     if (fd_fb < 0) {
         perror("addFeedback: open FEEDBACK_FILE");
         write(sock, "Error saving feedback. Please try again.\n", 41);

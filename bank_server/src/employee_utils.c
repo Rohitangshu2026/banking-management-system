@@ -108,9 +108,9 @@ void addNewCustomer(int sock) {
     newUser.isActive = 1;
     newCustomer.isActive = 1;
 
-    fd_user = open(USER_FILE, O_RDWR | O_CREAT, 0644);
-    fd_cust = open(CUSTOMER_FILE, O_RDWR | O_CREAT, 0644);
-    fd_session = open(SESSION_FILE, O_WRONLY | O_APPEND | O_CREAT, 0644); 
+    fd_user = open(USER_FILE, O_RDWR | O_CREAT, 0600);
+    fd_cust = open(CUSTOMER_FILE, O_RDWR | O_CREAT, 0600);
+    fd_session = open(SESSION_FILE, O_WRONLY | O_APPEND | O_CREAT, 0600); 
     
     if (fd_user < 0 || fd_cust < 0 || fd_session < 0) {
         write(sock, "Error: could not open data files.\n", 34);
@@ -304,7 +304,7 @@ static void _emp_unlockAccount(int fd, off_t offset) {
 }
 
 static int _emp_logTransaction(int accountId, const char* type, double amount, int relatedId) {
-    int fd_txn = open(TRANSACTION_FILE, O_WRONLY | O_APPEND | O_CREAT, 0644);
+    int fd_txn = open(TRANSACTION_FILE, O_WRONLY | O_APPEND | O_CREAT, 0600);
     if (fd_txn < 0) return 0;
     Transaction txn;
     txn.timestamp = time(NULL);

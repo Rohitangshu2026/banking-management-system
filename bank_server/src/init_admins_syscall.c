@@ -5,7 +5,7 @@
 #include "../include/common.h"
 
 int main() {
-    int fd = open("../data/admins.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    int fd = open("../data/admins.txt", O_WRONLY | O_CREAT | O_TRUNC, 0600);
     if (fd < 0) {
         write(STDERR_FILENO, "Cannot open admin file\n", 23);
         _exit(1);

@@ -141,7 +141,7 @@ void addEmployee(int sock) {
     user.password[strcspn(user.password, "\r\n")] = '\0';
     user.isActive = 1;
 
-    fd_user = open(USER_FILE, O_RDWR | O_CREAT, 0644);
+    fd_user = open(USER_FILE, O_RDWR | O_CREAT, 0600);
     if (fd_user < 0) {
         write(sock, "Error: could not open users.txt\n", 32);
         return;
@@ -184,7 +184,7 @@ void addEmployee(int sock) {
 
 
 void viewLogs(int sock) {
-    int fd = open(LOG_FILE, O_RDONLY | O_CREAT, 0644);
+    int fd = open(LOG_FILE, O_RDONLY | O_CREAT, 0600);
     if (fd < 0) {
         write(sock, "Error opening log file\n", 23);
         return;
@@ -279,7 +279,7 @@ void modifyUser(int sock) {
     } else {
         write(sock, "User details modified successfully.\n", 36);
 
-        int log_fd = open(LOG_FILE, O_WRONLY | O_APPEND | O_CREAT, 0644);
+        int log_fd = open(LOG_FILE, O_WRONLY | O_APPEND | O_CREAT, 0600);
         if (log_fd >= 0) {
             dprintf(log_fd, "Modified user: %s → %s\n", targetUsername, user.username);
             close(log_fd);
@@ -456,7 +456,7 @@ void manageUserRoles(int sock) {
             if (strcmp(original_role, "employee") == 0) {
                 unassignEmployeeLoans(sock, original_user_id);
             }
-            int log_fd = open(LOG_FILE, O_WRONLY | O_APPEND | O_CREAT, 0644);
+            int log_fd = open(LOG_FILE, O_WRONLY | O_APPEND | O_CREAT, 0600);
             if (log_fd >= 0) {
                 dprintf(log_fd, "Role changed: %s (%s → %s)\n",
                         user.username, original_role, new_role);
