@@ -17,8 +17,24 @@
 #define LOAN_FILE     "data/loans.txt" 
 
 ssize_t readLine(int sock, char *buf, size_t size);
-int isUserActive(int userId); 
-int checkUserRole(int userId, const char* expectedRole); 
+int isUserActive(int userId);
+int checkUserRole(int userId, const char* expectedRole);
+
+/*
+ * parse_int_strict: parse `s` as a decimal integer into `*out`.
+ * Returns 1 on success, 0 if the string is empty, contains non-digit
+ * characters (after optional sign), or overflows int. atoi() returns 0
+ * on garbage, which silently matches a valid menu choice of 0 — this
+ * is the strict replacement.
+ */
+int parse_int_strict(const char *s, int *out);
+
+/*
+ * safe_strcpy: bounded copy that always null-terminates. dst_sz is the
+ * total size of dst, including the terminator (use sizeof(dst) for arrays).
+ * Returns 1 if src fit, 0 if it was truncated.
+ */
+int safe_strcpy(char *dst, const char *src, size_t dst_sz);
 
 #define BUFFER_SIZE 1024
 #define HASHKEY     "$6$saltsalt$"

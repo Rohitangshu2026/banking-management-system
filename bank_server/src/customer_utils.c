@@ -752,7 +752,7 @@ int applyForLoan(int sock, int sourceAccountId, int userId) {
     newLoan.amount = amount;
     newLoan.timestamp = time(NULL);
     newLoan.employeeId = -1;
-    strcpy(newLoan.status, "PENDING");
+    safe_strcpy(newLoan.status, "PENDING", sizeof(newLoan.status));
 
     lseek(fd_loan, 0, SEEK_END);
     if (write(fd_loan, &newLoan, sizeof(Loan)) != sizeof(Loan)) {

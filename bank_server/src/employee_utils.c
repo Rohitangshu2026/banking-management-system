@@ -519,7 +519,9 @@ static int getCustomerUsernameByAccountId(int accountId, char *usernameOut) {
 
     while(read(fd_user, &user, sizeof(User)) == sizeof(User)) {
         if (user.id == targetUserId) {
-            strcpy(usernameOut, user.username);
+            /* Caller passes a MAX_NAME buffer; copy bounded for safety
+             * in case user.username from disk is not null-terminated. */
+            safe_strcpy(usernameOut, user.username, MAX_NAME);
             close(fd_user);
             return 1; 
         }

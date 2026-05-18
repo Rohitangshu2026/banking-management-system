@@ -1,10 +1,11 @@
 #include "../include/employee.h"
 #include "../include/employee_utils.h"
+#include "../include/common.h"
 #include <string.h>
 #include <unistd.h>
 #include <stdio.h>
-#include <stdlib.h> 
-#include <ctype.h> 
+#include <stdlib.h>
+#include <ctype.h>
 #include <fcntl.h>
 
 int employeeMenu(int sock) {
@@ -69,7 +70,11 @@ int employeeMenu(int sock) {
             break;
         }
 
-        int choice = atoi(buffer);  
+        int choice;
+        if (!parse_int_strict(buffer, &choice)) {
+            write(sock, "Invalid choice. Please enter a number.\n", 39);
+            continue;
+        }
 
         switch (choice) {
             case 1:

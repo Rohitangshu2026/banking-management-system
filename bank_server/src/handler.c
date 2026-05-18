@@ -36,7 +36,11 @@ void handle_client(int sock) {
         if (strlen(buffer) == 0) {
             continue; 
         }     
-        int choice = atoi(buffer);
+        int choice;
+        if (!parse_int_strict(buffer, &choice)) {
+            write(sock, "Invalid choice\n", 15);
+            continue;
+        }
         switch (choice) {
             case 1: 
                 session_fd = customerMenu(sock);

@@ -60,7 +60,11 @@ int customerMenu(int sock) {
             break;
         }
 
-        int choice = atoi(buffer);
+        int choice;
+        if (!parse_int_strict(buffer, &choice)) {
+            write(sock, "Invalid choice. Please enter a number.\n", 39);
+            continue;
+        }
 
         int op_status = 1;
 

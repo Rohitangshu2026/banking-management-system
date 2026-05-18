@@ -68,7 +68,11 @@ int managerMenu(int sock) {
         }
 
         choiceBuf[strcspn(choiceBuf, "\n")] = '\0';
-        int choice = atoi(choiceBuf);
+        int choice;
+        if (!parse_int_strict(choiceBuf, &choice)) {
+            write(sock, "Invalid choice. Please enter a number.\n", 39);
+            continue;
+        }
         
         int op_status = 1;
 
