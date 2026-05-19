@@ -27,8 +27,19 @@ public class AuthController {
     }
 
     @GetMapping("/health")
-    public Map<String, String> health() {
-        return Map.of("status", "ok");
+    public Map<String, Object> health() {
+        // Real readiness probe: open a throwaway TCP connection to
+        // bank_server and verify it sends the role-select menu within
+        // a short window. A bare {status: ok} doesn't catch the case
+        // where the gateway is up but the C server is dead.
+        try (BankConnection probe = bank.dial()) {
+            probe.readUntil(com.heritage.gateway.bridge.PromptMatcher.MAIN_MENU_CHOICE_PROMPT,
+                    java.time.Duration.ofSeconds(2));
+            return Map.of("status", "ok", "bank", "reachable");
+        } catch (RuntimeException e) {
+            return Map.of("status", "degraded", "bank", "unreachable",
+                    "detail", e.getMessage());
+        }
     }
 
     @PostMapping("/auth/login")

@@ -5,13 +5,11 @@ import { useToast } from "../components/Toast";
 import { api, ApiError, type Balance, type Transaction } from "../lib/api";
 import { fmtAccount, fmtDate, fmtMoney, fmtTime } from "../lib/format";
 
+// Only routes wired to a real component end up in the nav. Adding
+// purely visual entries with non-existent destinations bounces the
+// user to /login via the route catch-all.
 const nav = [
   { label: "Overview", to: "/customer" },
-  { label: "Transactions", to: "/customer/transactions" },
-  { label: "Transfers", to: "/customer/transfers" },
-  { label: "Loans", to: "/customer/loans" },
-  { label: "Statements", to: "/customer/statements" },
-  { label: "Settings", to: "/customer/settings" },
 ];
 
 type DialogKind = null | "deposit" | "withdraw" | "transfer" | "loan" | "feedback" | "password";

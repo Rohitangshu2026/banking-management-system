@@ -5,8 +5,7 @@ import { useToast } from "../components/Toast";
 import { api, ApiError } from "../lib/api";
 
 const nav = [
-  { label: "Users", to: "/admin" },
-  { label: "Audit log", to: "/admin/audit" },
+  { label: "Console", to: "/admin" },
 ];
 
 type Tab = "users" | "audit";

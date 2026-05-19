@@ -7,7 +7,6 @@ import { fmtAccount, fmtMoney } from "../lib/format";
 
 const nav = [
   { label: "Loan queue", to: "/employee" },
-  { label: "Settings", to: "/employee/settings" },
 ];
 
 export default function EmployeeConsole() {

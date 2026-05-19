@@ -5,10 +5,10 @@ import { useToast } from "../components/Toast";
 import { api, ApiError, type Feedback, type PendingLoan } from "../lib/api";
 import { fmtAccount, fmtDate, fmtMoney, fmtTime } from "../lib/format";
 
+// Tabs handle switching between sub-views; the sidebar just anchors
+// the manager landing route.
 const nav = [
-  { label: "Loan assignment", to: "/manager" },
-  { label: "Customer status", to: "/manager/customers" },
-  { label: "Feedback inbox", to: "/manager/feedback" },
+  { label: "Console", to: "/manager" },
 ];
 
 type Tab = "loans" | "customers" | "feedback";
