@@ -69,6 +69,8 @@ public class BankClient {
 
     public BankClient(BankProperties props) {
         this.props = props;
+        log.info("BankClient configured for bank_server at {}:{} (connect={}ms, read={}ms)",
+                props.host(), props.port(), props.connectTimeoutMs(), props.readTimeoutMs());
     }
 
     // ============================================================
@@ -76,9 +78,13 @@ public class BankClient {
     // ============================================================
 
     public BankConnection dial() {
+        log.info("dialing bank_server at {}:{}", props.host(), props.port());
         try {
-            return new BankConnection(props.host(), props.port(), props.connectTimeoutMs());
+            BankConnection c = new BankConnection(props.host(), props.port(), props.connectTimeoutMs());
+            log.info("dial OK to {}:{}", props.host(), props.port());
+            return c;
         } catch (IOException e) {
+            log.warn("dial FAILED to {}:{}: {}", props.host(), props.port(), e.toString());
             throw new BankProtocolException(502, "unable to reach bank_server at "
                     + props.host() + ":" + props.port(), e);
         }
