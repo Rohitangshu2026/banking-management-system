@@ -39,6 +39,22 @@ int safe_strcpy(char *dst, const char *src, size_t dst_sz);
 #define BUFFER_SIZE 1024
 #define HASHKEY     "$6$saltsalt$"
 
+/* Auto-incrementing-ID bases. Each *_utils.c walks the relevant file at
+ * write time, finds the current max, and assigns max+1. The bases here
+ * are the lower bound used when the file is empty.
+ *
+ * Customer account ids start at 1000 to make them visually distinct
+ * from the small user-table ids (1, 2, …). Loan ids start at 5000 for
+ * the same reason. Don't lower these — existing data files reference
+ * the larger ranges. */
+#define CUSTOMER_ID_BASE 1000
+#define LOAN_ID_BASE     5000
+
+/* Hard cap so a corrupted file with a near-INT_MAX id can't wrap us
+ * back to negative on the next increment. INT_MAX - 1024 leaves a
+ * comfortable buffer for the next 1024 new records. */
+#define MAX_AUTO_ID      (2147483647 - 1024)
+
 #define MAX_NAME    50
 #define MAX_PASS    50
 #define MAX_ROLE    30

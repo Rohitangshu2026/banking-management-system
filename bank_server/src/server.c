@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 #include <arpa/inet.h>
 #include <signal.h>
 #include <sys/wait.h>
@@ -9,8 +11,61 @@
 
 #include "../include/handler.h"
 #include "../include/server.h"
+#include "../include/common.h"
 
 volatile sig_atomic_t keepRunning = 1;
+
+/* Ensure data/sessions.txt has one Session slot for every User. The
+ * standalone init_sessions binary does the same thing — folded in here
+ * so operators don't have to remember to run it on first boot or after
+ * adding a user out-of-band. */
+static void ensure_sessions_file(void) {
+    int fd_user = open(USER_FILE, O_RDONLY);
+    if (fd_user < 0) {
+        /* No users yet — server can still start; addEmployee will populate. */
+        return;
+    }
+    struct stat ust;
+    if (fstat(fd_user, &ust) < 0) {
+        close(fd_user);
+        return;
+    }
+    size_t user_count = (size_t)ust.st_size / sizeof(User);
+
+    struct stat sst;
+    int need_rewrite = 1;
+    if (stat(SESSION_FILE, &sst) == 0) {
+        size_t sess_count = (size_t)sst.st_size / sizeof(Session);
+        need_rewrite = (sess_count != user_count);
+    }
+    if (!need_rewrite) {
+        close(fd_user);
+        return;
+    }
+
+    int fd_sess = open(SESSION_FILE, O_WRONLY | O_CREAT | O_TRUNC, 0600);
+    if (fd_sess < 0) {
+        perror("ensure_sessions_file: open SESSION_FILE");
+        close(fd_user);
+        return;
+    }
+    User u;
+    Session s;
+    size_t written = 0;
+    while (read(fd_user, &u, sizeof(User)) == sizeof(User)) {
+        memset(&s, 0, sizeof(s));
+        s.userId = u.id;
+        s.fd = -1;
+        s.pid = -1;
+        if (write(fd_sess, &s, sizeof(Session)) != sizeof(Session)) break;
+        written++;
+    }
+    fsync(fd_sess);
+    close(fd_sess);
+    close(fd_user);
+    printf("[SERVER] sessions.txt regenerated (%zu records)\n", written);
+    fflush(stdout);
+}
 
 void sigchld_handler(int signo) {
     (void)signo;
@@ -25,6 +80,8 @@ void sigint_handler(int signo) {
 }
 
 int main(void) {
+    ensure_sessions_file();
+
     int server_fd, client_fd;
     struct sockaddr_in server_addr, client_addr;
     socklen_t client_len = sizeof(client_addr);

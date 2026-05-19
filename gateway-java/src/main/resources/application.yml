@@ -14,6 +14,9 @@ bank:
 session:
   idle-timeout: PT30M
 
+gateway:
+  rate-limit-per-minute: 120
+
 logging:
   pattern:
     console: "%d{HH:mm:ss.SSS} %-5level %logger{20} - %msg%n"

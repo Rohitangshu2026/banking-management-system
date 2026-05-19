@@ -71,10 +71,10 @@ int validateCustomer(const char *username, const char *password, Customer *custo
         return -2; 
     }
 
-    fd_cust = open(CUSTOMER_FILE, O_RDONLY); 
+    fd_cust = open(CUSTOMER_FILE, O_RDONLY);
     if (fd_cust < 0) {
         perror("open customer file");
-        close(fd_session); 
+        close(fd_session);
         return -1;
     }
 
@@ -90,9 +90,30 @@ int validateCustomer(const char *username, const char *password, Customer *custo
     close(fd_cust);
 
     if (!account_found) {
-        write(STDOUT_FILENO, "Error: No active customer account for user.\n", 45); 
-        close(fd_session); 
-        return 0; 
+        write(STDOUT_FILENO, "Error: No active customer account for user.\n", 45);
+        close(fd_session);
+        return 0;
+    }
+
+    /* TOCTOU close: between the User.isActive check above (before the
+     * session lock) and reaching this point, an admin or manager could
+     * have flipped the active flag. Re-read the User record while
+     * holding the session lock and bail out if so. */
+    int fd_user_recheck = open(USER_FILE, O_RDONLY);
+    if (fd_user_recheck >= 0) {
+        User u;
+        int still_active = 0;
+        while (read(fd_user_recheck, &u, sizeof(User)) == sizeof(User)) {
+            if (u.id == foundUserId) {
+                still_active = (u.isActive == 1);
+                break;
+            }
+        }
+        close(fd_user_recheck);
+        if (!still_active) {
+            close(fd_session);
+            return 0;
+        }
     }
 
     return fd_session;
@@ -738,12 +759,21 @@ int applyForLoan(int sock, int sourceAccountId, int userId) {
     }
 
     Loan tempLoan;
-    int last_id = 5000;
+    int last_id = LOAN_ID_BASE;
     lseek(fd_loan, 0, SEEK_SET);
     while (read(fd_loan, &tempLoan, sizeof(Loan)) == sizeof(Loan)) {
         if (tempLoan.loanId > last_id) {
             last_id = tempLoan.loanId;
         }
+    }
+    if (last_id >= MAX_AUTO_ID) {
+        write(sock, "Loan registry is full. Contact administrator.\n", 47);
+        struct flock unlock = {0};
+        unlock.l_type = F_UNLCK;
+        unlock.l_whence = SEEK_SET;
+        fcntl(fd_loan, F_SETLK, &unlock);
+        close(fd_loan);
+        return 1;
     }
 
     Loan newLoan;

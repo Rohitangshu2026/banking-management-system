@@ -152,10 +152,17 @@ void addNewCustomer(int sock) {
 
 
     Customer tempCust;
-    int last_cust_id = 1000; 
+    int last_cust_id = CUSTOMER_ID_BASE;
     lseek(fd_cust, 0, SEEK_SET);
     while (read(fd_cust, &tempCust, sizeof(Customer)) == sizeof(Customer)) {
         if (tempCust.id > last_cust_id) last_cust_id = tempCust.id;
+    }
+    if (last_cust_id >= MAX_AUTO_ID || last_user_id >= MAX_AUTO_ID) {
+        write(sock, "Account-id space exhausted. Contact administrator.\n", 53);
+        user_lock.l_type = F_UNLCK; fcntl(fd_user, F_SETLK, &user_lock);
+        cust_lock.l_type = F_UNLCK; fcntl(fd_cust, F_SETLK, &cust_lock);
+        close(fd_user); close(fd_cust); close(fd_session);
+        return;
     }
     newCustomer.id = last_cust_id + 1;
     newCustomer.userId = newUser.id; 
