@@ -16,6 +16,10 @@ bank_server/*.dSYM/
 bank_server/certs/
 gateway/certs/
 gateway/bank-gateway
+gateway-java/target/
+gateway-java/.mvn/
+gateway-java/*.iml
+gateway-java/.idea/
 
 # Web frontend
 web/node_modules/

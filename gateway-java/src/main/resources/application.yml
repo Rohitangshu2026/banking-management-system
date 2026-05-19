@@ -1,0 +1,21 @@
+server:
+  port: 8443
+
+spring:
+  application:
+    name: bms-gateway
+
+bank:
+  host: 127.0.0.1
+  port: 8080
+  connect-timeout-ms: 5000
+  read-timeout-ms: 8000
+
+session:
+  idle-timeout: PT30M
+
+logging:
+  pattern:
+    console: "%d{HH:mm:ss.SSS} %-5level %logger{20} - %msg%n"
+  level:
+    com.heritage.gateway: INFO
