@@ -1,7 +1,7 @@
 # bms-web
 
-The React + Vite frontend. Talks to the Go gateway under `/api`; the
-gateway in turn proxies to `bank_server` over TCP.
+The React + Vite frontend. Talks to the Spring Boot gateway under
+`/api`; the gateway in turn proxies to `bank_server` over TCP.
 
 ## Stack
 
@@ -62,13 +62,20 @@ columns line up with tabular figures.
 
 ## State of the UI
 
-- **Login** — wired end-to-end against the gateway.
-- **Customer dashboard** — fully styled, but populated with mock data
-  until the gateway exposes `/api/transactions` and `/api/me` returns
-  the balance shape. Swapping in real data is a one-line change in
-  each section.
-- **Employee / Manager / Admin** consoles — scaffolded with the nav
-  and chrome; tables and dialogs are stubs.
+All four role consoles talk to the Spring Boot gateway with real data.
 
-See `../gateway/README.md` for the endpoint punch list that gates the
-rest of the views.
+- **Login** — role select + credentials, posts to `/api/auth/login`.
+- **Customer dashboard** — balance hero, recent-activity table, and
+  five action dialogs (deposit, withdraw, transfer, loan, feedback,
+  change password). Loading skeletons while `/api/account` and
+  `/api/transactions` resolve.
+- **Employee console** — assigned-loan queue from `/api/loans/assigned`
+  with approve/reject buttons, plus an "open new customer account"
+  dialog.
+- **Manager console** — three tabs: pending-loan assignment, customer
+  activate/deactivate, feedback inbox.
+- **Admin console** — user management (add, modify, change role) and
+  an audit-log viewer that streams `data/logs.txt`.
+
+Toasts via `components/Toast.tsx`; dialogs via `components/Dialog.tsx`.
+No external UI library.

@@ -5,6 +5,7 @@ import EmployeeConsole from "./pages/EmployeeConsole";
 import ManagerConsole from "./pages/ManagerConsole";
 import AdminConsole from "./pages/AdminConsole";
 import { AuthProvider, useAuth } from "./auth";
+import { ToastProvider } from "./components/Toast";
 
 function RequireRole({
   role,
@@ -21,6 +22,7 @@ function RequireRole({
 
 export default function App() {
   return (
+    <ToastProvider>
     <AuthProvider>
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
@@ -60,5 +62,6 @@ export default function App() {
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </AuthProvider>
+    </ToastProvider>
   );
 }

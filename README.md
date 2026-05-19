@@ -4,7 +4,7 @@ A multi-role banking system written in C, with a fork-per-client TCP
 server, a CLI client, an HTTP/JSON gateway, and a React web console.
 
 > Originally a System Software course project (CSE513A). This branch is
-> a hardening pass: it tightens the C server, adds a Go gateway in front
+> a hardening pass: it tightens the C server, adds a Spring Boot gateway in front
 > of it so a browser can speak to the bank, and ships a React UI with
 > a classic-bank visual language.
 
@@ -14,7 +14,7 @@ server, a CLI client, an HTTP/JSON gateway, and a React web console.
 
 ```
 ┌──────────┐  HTTPS + cookie  ┌──────────────┐    TCP    ┌──────────────┐
-│ Browser  │ ───────────────► │ Go gateway   │ ────────► │ bank_server  │
+│ Browser  │ ───────────────► │ Spring Boot gateway   │ ────────► │ bank_server  │
 │  (React) │                  │ (HTTP / WS)  │           │  (C, fcntl)  │
 └──────────┘                  └──────────────┘           └──────────────┘
                                                                 │
@@ -60,12 +60,15 @@ the web app.
 │   ├── data/            # Binary-struct data files (users, customers, …)
 │   └── Makefile
 ├── client.c             # CLI client (talks plain TCP to bank_server)
-├── gateway/             # Go HTTP/JSON gateway (stdlib only)
-│   ├── main.go          # Entrypoint, flags, optional TLS
-│   ├── gateway.go       # Session store, cookie HMAC
-│   ├── bridge.go        # bankConn: TCP-menu wrapper
-│   ├── routes.go        # /api/* handlers
-│   ├── middleware.go    # access log, per-IP rate limit
+├── gateway-java/        # Spring Boot 3.3 / Java 17 gateway
+│   ├── pom.xml          # Maven build (Spring Boot starter parent)
+│   ├── src/main/java/com/heritage/gateway/
+│   │   ├── bridge/      # BankConnection, BankClient, PromptMatcher, …
+│   │   ├── controller/  # Auth / Customer / Employee / Manager / Admin
+│   │   ├── dto/         # request + response records
+│   │   ├── web/         # SessionGuard, CORS, exception handler
+│   │   └── config/      # BankProperties
+│   ├── src/main/resources/application.yml
 │   └── README.md
 └── web/                 # Vite + React + TS frontend
     ├── src/pages/       # Login + four role consoles
@@ -76,8 +79,9 @@ the web app.
 
 ## Quick start
 
-You need a C toolchain, Go (≥1.22), Node + pnpm (or npm), and a Unix
-machine. Tested on macOS (Darwin 25) with clang and on Linux with gcc.
+You need a C toolchain, JDK 17, Maven 3.9+, Node + pnpm (or npm), and
+a Unix machine. Tested on macOS (Darwin 25) with clang and OpenJDK 17,
+and on Linux with gcc.
 
 ```sh
 # 1. Build & run the bank server
@@ -87,9 +91,8 @@ make all              # builds server, init_sessions, ../client
 ./server              # listens on :8080
 
 # 2. Build & run the gateway (in a second terminal)
-cd gateway
-go build -o bank-gateway
-./bank-gateway        # listens on :8443
+cd gateway-java
+mvn spring-boot:run   # listens on :8443
 
 # 3. Run the web app (in a third terminal)
 cd web
@@ -98,7 +101,7 @@ pnpm dev              # http://localhost:5173
 ```
 
 Defaults assume everything is on `127.0.0.1`. Override via flags or env
-vars — see [`gateway/README.md`](gateway/README.md) and
+vars — see [`gateway-java/README.md`](gateway-java/README.md) and
 [`web/README.md`](web/README.md).
 
 ## Building
@@ -120,14 +123,16 @@ CFLAGS default to `-O2 -g -Wall -Wextra -Wstrict-prototypes -Wshadow
 The `.d` files emitted by `-MMD` give incremental builds when headers
 change. Don't disable them unless you have a good reason.
 
-### gateway
+### gateway-java
 
 ```sh
-cd gateway
-go build ./...
+cd gateway-java
+mvn package                    # produces target/bms-gateway.jar
+java -jar target/bms-gateway.jar
 ```
 
-Stdlib only — no module cache prefetch required.
+Maven downloads Spring Boot and Jackson into the local cache on first
+build. Subsequent builds are incremental.
 
 ### web
 
@@ -206,7 +211,7 @@ What's *not* done, by design or because it's bigger than one branch:
 - **Rate limiting and CSRF** live in the gateway only; the C server
   trusts whatever connects to it on `:8080`.
 - **WebSocket push** for live balance updates — endpoint surface
-  exists, handler doesn't. See `gateway/README.md` punch list.
+  exists, handler doesn't. See `gateway-java/README.md` punch list.
 
 ## Development tips
 
