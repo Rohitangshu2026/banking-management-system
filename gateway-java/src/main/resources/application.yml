@@ -18,4 +18,4 @@ logging:
   pattern:
     console: "%d{HH:mm:ss.SSS} %-5level %logger{20} - %msg%n"
   level:
-    com.heritage.gateway: DEBUG
+    com.heritage.gateway: INFO

@@ -94,7 +94,19 @@ public class BankClient {
      * Drive the role-select → login → role-menu walk. On success returns
      * with the socket parked at the role menu's choice prompt.
      */
-    public void authenticate(BankConnection c, String role, String username, String password) {
+    /**
+     * If a customer just authenticated successfully, bank_server emits an
+     * "Account: NNNN\n" line right after "Login successful!\n". This
+     * captures that integer so the session can carry the account id
+     * around without a follow-up viewBalance round-trip. Returns null
+     * if the line isn't present (non-customer role, or older server build).
+     */
+    private static Integer extractAccountId(String resp) {
+        Matcher m = Pattern.compile("Account:\\s*(\\d+)").matcher(resp);
+        return m.find() ? Integer.parseInt(m.group(1)) : null;
+    }
+
+    public Integer authenticate(BankConnection c, String role, String username, String password) {
         int roleChoice = switch (role) {
             case "customer" -> 1;
             case "employee" -> 2;
@@ -131,8 +143,12 @@ public class BankClient {
         if (!resp.contains(roleMarker)) {
             throw new BankProtocolException(502, "login response did not include " + roleMarker);
         }
+        // Customer logins emit "Account: NNNN\n" between "Login successful!"
+        // and the menu marker. Capture it for the session.
+        Integer accountId = "customer".equals(role) ? extractAccountId(resp) : null;
         // Finally land at the role's choice prompt.
         c.readUntil(MAIN_MENU_CHOICE_PROMPT, STD_TIMEOUT);
+        return accountId;
     }
 
     public void logout(BankSession session, int logoutChoice) {
@@ -224,9 +240,16 @@ public class BankClient {
         // is already returning to the menu, and we'll catch the error
         // pattern in the next read.
         c.send(formatAmount(amount));
-        String resp = c.readUntil(List.of(TRANSFER_OK_PREFIX, INSUFFICIENT_FUNDS,
+        // The success path emits TWO lines:
+        //   "Transferred $X.XX to USERNAME (Account YYY).\n"
+        //   "Your new balance is $Z.ZZ\n"
+        // Match on the second line's substring so the response covers both
+        // lines — otherwise tryMatch's line-aware boundary would leave the
+        // new-balance line in residual and parseNewBalance would see only
+        // the transfer amount.
+        String resp = c.readUntil(List.of("Your new balance is", INSUFFICIENT_FUNDS,
                 SELF_TRANSFER, TARGET_NOT_CUSTOMER, TARGET_DEACTIVATED,
-                INVALID_TRANSFER, "CRITICAL", MAIN_MENU_CHOICE_PROMPT), STD_TIMEOUT);
+                INVALID_TRANSFER, "CRITICAL"), STD_TIMEOUT);
         guardDeactivated(resp);
         if (resp.contains(TARGET_NOT_CUSTOMER) || resp.contains(TARGET_DEACTIVATED)) {
             c.readUntil(MAIN_MENU_CHOICE_PROMPT, STD_TIMEOUT);
@@ -469,10 +492,11 @@ public class BankClient {
             return out;
         }
         if (afterFooter.contains(MGR_ASSIGN_LOAN_ID_PROMPT)) {
-            // Send sentinel "0" so the server prints "Loan ID not found" and
-            // returns to the menu without altering state.
+            // Send sentinel "0" — bank_server treats this as "no such loan"
+            // and returns to the manager menu without any error line, so a
+            // single readUntil(choice prompt) is enough; a second one
+            // deadlocks waiting for bytes the server never sends.
             c.send("0");
-            c.readUntil(List.of(MAIN_MENU_CHOICE_PROMPT, "not found"), STD_TIMEOUT);
             c.readUntil(MAIN_MENU_CHOICE_PROMPT, STD_TIMEOUT);
         }
 

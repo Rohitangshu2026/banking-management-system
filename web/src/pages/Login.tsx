@@ -111,8 +111,7 @@ export default function Login() {
           </button>
 
           <p className="text-center text-xs text-slate2">
-            Protected by mutually authenticated TLS. By signing in you accept
-            our acceptable-use policy.
+            Demo deployment. Please use the seeded credentials.
           </p>
         </form>
       </div>

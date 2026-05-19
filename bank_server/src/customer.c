@@ -36,6 +36,17 @@ int customerMenu(int sock) {
     session_fd = result;
     write(sock, "Login successful!\n", 18);
 
+    /* Emit the account id so out-of-band consumers (the HTTP gateway)
+     * can record it without having to call viewBalance separately. The
+     * CLI client just prints this line through to the terminal — no
+     * harm, and a useful breadcrumb for the user. */
+    char acctLine[64];
+    int acctLen = snprintf(acctLine, sizeof(acctLine),
+                           "Account: %d\n", currentCustomer.id);
+    if (acctLen > 0) {
+        write(sock, acctLine, (size_t)acctLen);
+    }
+
     int running = 1;
     while (running) {
         const char *menu =

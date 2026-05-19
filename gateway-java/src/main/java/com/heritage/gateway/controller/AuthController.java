@@ -35,13 +35,18 @@ public class AuthController {
     public MeDto login(@Valid @RequestBody LoginRequest req,
                        HttpServletRequest httpReq, HttpServletResponse httpRes) {
         BankConnection conn = bank.dial();
+        Integer accountId;
         try {
-            bank.authenticate(conn, req.role(), req.username(), req.password());
+            accountId = bank.authenticate(conn, req.role(), req.username(), req.password());
         } catch (RuntimeException e) {
             conn.close();
             throw e;
         }
         BankSession session = store.issue(req.role(), req.username(), conn);
+        if (accountId != null) {
+            session.setAccountId(accountId);
+        }
+
         setSessionCookie(httpReq, httpRes, store.sign(session.id()));
         return new MeDto(session.role(), session.username(), session.accountId());
     }

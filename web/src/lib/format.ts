@@ -9,9 +9,11 @@ const usd = new Intl.NumberFormat("en-US", {
 
 export const fmtMoney = (n: number) => usd.format(n);
 
-export const fmtAccount = (id: number) =>
+export const fmtAccount = (id: number | null | undefined) => {
+  if (id == null || id < 0 || !Number.isFinite(id)) return "—";
   // Pad to 10 chars so account numbers align in tables.
-  String(id).padStart(10, "0");
+  return String(id).padStart(10, "0");
+};
 
 export const fmtDate = (d: Date | string | number) => {
   const date = typeof d === "object" ? d : new Date(d);
